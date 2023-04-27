@@ -1,16 +1,27 @@
-import React, { useContext, useState } from "react";
-import { useAI } from "~/context/AIContext";
+import axios from "axios";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 function Transcript() {
-  const { loadTranscript } = useAI();
   const [transcript, setTranscript] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleProcessButtonClick = () => {
-    if (loadTranscript) {
-      setLoading(true);
-      loadTranscript(transcript).finally(() => setLoading(false));
-    }
+    setLoading(true);
+    axios
+      .post("/api/pinecone", { text: transcript })
+      .then(() => {
+        toast.success(
+          "Successfully saved to Pinecone. Time to start chatting.",
+          { position: "bottom-right" }
+        );
+      })
+      .catch(() => {
+        toast.error("Error saving to Pinecone. Try again.", {
+          position: "bottom-right",
+        });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
