@@ -6,6 +6,10 @@ import { z } from "zod";
  */
 const server = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
+  PINECONE_API_KEY: z.string(),
+  PINECONE_ENVIRONMENT: z.string(),
+  PINECONE_INDEX: z.string(),
+  OPENAI_API_KEY: z.string(),
 });
 
 /**
@@ -13,11 +17,7 @@ const server = z.object({
  * built with invalid env vars. To expose them to the client, prefix them with `NEXT_PUBLIC_`.
  */
 const client = z.object(
-  /** @satisfies {Record<`NEXT_PUBLIC_${string}`, import('zod').ZodType>} */ (
-    {
-      // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
-    }
-  ),
+  /** @satisfies {Record<`NEXT_PUBLIC_${string}`, import('zod').ZodType>} */ ({})
 );
 
 /**
@@ -28,7 +28,10 @@ const client = z.object(
  */
 const processEnv = {
   NODE_ENV: process.env.NODE_ENV,
-  // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  PINECONE_API_KEY: process.env.PINECONE_API_KEY,
+  PINECONE_ENVIRONMENT: process.env.PINECONE_ENVIRONMENT,
+  PINECONE_INDEX: process.env.PINECONE_INDEX,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 };
 
 // Don't touch the part below
@@ -58,7 +61,7 @@ if (!skip) {
   if (parsed.success === false) {
     console.error(
       "❌ Invalid environment variables:",
-      parsed.error.flatten().fieldErrors,
+      parsed.error.flatten().fieldErrors
     );
     throw new Error("Invalid environment variables");
   }
@@ -72,7 +75,7 @@ if (!skip) {
         throw new Error(
           process.env.NODE_ENV === "production"
             ? "❌ Attempted to access a server-side environment variable on the client"
-            : `❌ Attempted to access server-side environment variable '${prop}' on the client`,
+            : `❌ Attempted to access server-side environment variable '${prop}' on the client`
         );
       return target[/** @type {keyof typeof target} */ (prop)];
     },
